@@ -1,6 +1,7 @@
 function cost = my_cost(x,param)
-[N,s,M,Nq] = getParams();
-g = 9.81;
+
+[g,GR,N,l,Mass,Nq] = getParams();
+
 
 %% --- decompose x ---
 z0 = x(1);

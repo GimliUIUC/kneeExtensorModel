@@ -1,7 +1,6 @@
-function [cineq,ceq] = non_con(x,k_w,k_t)
-[N,s,M,Nq] = getParams();
-g = 9.81;
-GR = 23;
+function [cineq,ceq] = KEM_con(x,k_w,k_t)
+
+[g,GR,N,l,Mass,Nq] = getParams();
 
 %% --- decompose x ---
 z0 = x(1);
@@ -22,7 +21,6 @@ t = linspace(0, param.T_stance,N);
 
 ss = t/param.T_stance;
 Fz = polyval_bz([0, param.alpha],ss);
-
 
 parameters = [s,M];
 J = zeros(2,2,size(X,1));

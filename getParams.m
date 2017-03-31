@@ -1,8 +1,12 @@
-function [N,s,M,Nq] = getParams()
+
+%% getParams function is for storing all the constants
+function [g,GR,N,l,Mass,Nq] = getParams()
+    g = 9.81;
+    GR = 23.3594;
     N = 10;         % length for q/dq
-    s = 0.12;      % linkage length
-    M = 0.74;
-%     M = 0.8;
+    l = 0.12;
+    Mass = 0.74;
+%     Mass = 0.8;
     Nq = 8;         % starting index of q/dq in optVar
 
 end
