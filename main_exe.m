@@ -1,5 +1,6 @@
 %% setting up
 addpath('fcns')
+addpath('visualization')
 
 k_w = 1;
 k_t = 1;
@@ -52,6 +53,8 @@ options = optimset( 'Display','iter',...
                     'TolCon',1e-6);
 
 [xOpt, fval] = fmincon(@KEM_cost,xOpt0,A,b,Aeq,beq,lb,ub,@(x)KEM_con(x,k_w,k_t),options)
+
+
 
 
 
