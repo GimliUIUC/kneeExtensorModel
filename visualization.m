@@ -1,7 +1,6 @@
 %% function for visualization
 function visualization(x)
-[N,s,M,Nq] = getParams();
-g = 9.81;
+[g,GR,N,l,Mass,Nq] = getParams();
 
 %% --- decompose optimization variables ---
 z0 = x(1);

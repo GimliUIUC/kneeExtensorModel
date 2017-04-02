@@ -1,21 +1,15 @@
-function cost = my_cost(x,param)
+function cost = KEM_cost(xOpt)
 
 [g,GR,N,l,Mass,Nq] = getParams();
 
 
 %% --- decompose x ---
-z0 = x(1);
-param.alpha = x(2:6);       % 5th order bezier polynomial
-param.T_stance = x(7);
-q1 = x(Nq:Nq+N-1);
-q2 = x(Nq+N:Nq+2*N-1);
-dq1 = x(Nq+2*N:Nq+3*N-1);
-dq2 = x(Nq+3*N:Nq+4*N-1);
+[z0, T_st, delta_x, alpha_x, q, dq] = decompose_x(xOpt);
 
 %% 
 ic = [z0;0];
-t = linspace(0, param.T_stance,N);
-[t,X] = ode45(@(t,X)my_dynamics(t,X,param),t,ic);
+t = linspace(0, T_st,N);
+[t,X] = ode45(@(t,X)my_dynamics(t,X,xOpt),t,ic);
 
 
 %%

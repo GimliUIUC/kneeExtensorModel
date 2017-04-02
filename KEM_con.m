@@ -1,37 +1,35 @@
-function [cineq,ceq] = KEM_con(x,k_w,k_t)
+function [cineq,ceq] = KEM_con(xOpt,k_w,k_t)
 
 [g,GR,N,l,Mass,Nq] = getParams();
 
-%% --- decompose x ---
-z0 = x(1);
-param.alpha = x(2:6);
-param.T_stance = x(7);
-q1 = x(Nq:Nq+N-1);
-q2 = x(Nq+N:Nq+2*N-1);
-dq1 = x(Nq+2*N:Nq+3*N-1);
-dq2 = x(Nq+3*N:Nq+4*N-1);
+%% --- decompose xOpt ---
+[z0, T_st, delta_x, alpha_x, q, dq] = decompose_x(xOpt);
 
-q = [q1;q2]';       % n by 2
-dq = [dq1;dq2]';    % n by 2
+q1 = q(1:N)';
+q2 = q(N+1:2*N)';
+dq1 = dq(1:N)';
+dq2 = dq(N+1:2*N)';
+q2col = [q1,q2];
+dq2col = [dq1,dq2];
 
 %% --- simulate dynamics ---
 ic = [z0;0];
-t = linspace(0, param.T_stance,N);
-[t, X] = ode45(@(t,X)my_dynamics(t,X,param),t,ic);
+t = linspace(0, T_st,N);
+[t, X] = ode45(@(t,X)my_dynamics(t,X,xOpt),t,ic);
 
-ss = t/param.T_stance;
-Fz = polyval_bz([0, param.alpha],ss);
+% ss and Fz are vectors of length(t)
+ss = t/T_st;
+Fz = polyval_bz([0, alpha_x,0],ss);
 
-parameters = [s,M];
-J = zeros(2,2,size(X,1));
-u = zeros(2,size(X,1));
-for ii=1:size(X,1)
-    z = X(ii,1);
+parameters = [l,Mass];          % parameter for Jacobian calculation
+J = zeros(2,2,N);
+tau = zeros(2,N);
+for ii=1:N
     qq = [q1(ii),q2(ii)];
     J(:,:,ii) = fcn_J(qq,parameters);
-    u(:,ii) = J(:,:,ii)'*[0;Fz(ii)];
+    tau(:,ii) = J(:,:,ii)'*[0;Fz(ii)];
 end
-tau = u;
+
 %% --- constraints ---
 speed_max = 7451*2*pi/(60*GR)*k_w;% rpm to rad/s
 tor_max = 0.42*GR*k_t;
@@ -50,12 +48,10 @@ cineq = [cineq;vec(-X(:,1)+0.02)];% constraints on z displacement
 cineq = [cineq;vec(X(:,1)-0.23)];
 
 % --- equality constraints ---
-q = q';     % 2 by n
-dq = dq';   % 2 by n
 ceq = [];
-for jj = 1:size(dq,2)
-    ceq = [ceq;forward(q(:,jj))-[0;X(jj,1)]];    % no slip
-    ceq = [ceq;-J(:,:,jj)*dq(:,jj) - [0;X(jj,2)]];       % no relative v
+for jj = 1:N
+    ceq = [ceq;forward(q2col(jj,:)')-[0;X(jj,1)]];    % no slip
+    ceq = [ceq;-J(:,:,jj)*dq2col(jj,:)' - [0;X(jj,2)]];       % no relative v
 end
 
 % [value index] = max(ceq);
